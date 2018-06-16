@@ -51,4 +51,47 @@ describe('TreeBranch', function () {
       expect(treebranch.serializers.toList(arr)).to.deep.equal(['object', ['string', 'foo'], ['string', 'bar']])
     });
   });
+
+  context('Language', function () {
+    let language = new treebranch.Language();
+    let l = language.build('foo', ['bar']);
+    let typer = (code) => code.constructor.name;
+
+    it('handles strings correctly', function () {
+      let code = l.bar('baz');
+      expect(typer(code.args[0])).to.equal('StrNode');
+    });
+
+    it('handles numbers correctly', function () {
+      let code = l.bar(4);
+      expect(typer(code.args[0])).to.equal('NumNode');
+    });
+
+    it('handles booleans correctly', function () {
+      let code = l.bar(true);
+      expect(typer(code.args[0])).to.equal('BoolNode');
+    });
+
+    it('handles null correctly', function () {
+      let code = l.bar(null);
+      expect(typer(code.args[0])).to.equal('NullNode');
+    });
+
+    it('handles undefined correctly', function () {
+      let code = l.bar(undefined);
+      expect(typer(code.args[0])).to.equal('UndefNode');
+    });
+
+    it('handles arrays correctly', function () {
+      let code = l.bar([1, 'foo']);
+      expect(typer(code.args[0])).to.equal('ArrNode');
+      expect(code.args[0].items.map(typer)).to.deep.equal(['NumNode', 'StrNode'])
+    });
+
+    it('handles objects correctly', function () {
+      let code = l.bar({ foo: 4 });
+      expect(typer(code.args[0])).to.equal('ObjNode');
+      expect(code.args[0].pairs.map(typer)).to.deep.equal(['StrNode', 'NumNode'])
+    });
+  })
 });

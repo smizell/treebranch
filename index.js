@@ -31,7 +31,7 @@ class ArrNode {
 }
 
 class ObjNode {
-  constructor(pairs) {
+  constructor(pairs = []) {
     this.pairs = pairs;
   }
 }
@@ -95,21 +95,39 @@ class Language {
     }, { _meta: { langName } });
   }
 
-  handleArgs(args) {
-    return args.map((arg) => {
-      if (Number.isInteger(arg)) {
-        return new NumNode(arg);
+  handleArg(arg) {
+    if (Number.isInteger(arg)) {
+      return new NumNode(arg);
+    }
+    if (Array.isArray(arg)) {
+      return new ArrNode(arg.map(this.handleArg.bind(this)));
+    }
+    if ((typeof arg) === 'string') {
+      return new StrNode(arg);
+    }
+    if ((typeof arg) === 'boolean') {
+      return new BoolNode(arg);
+    }
+    if (arg === null) {
+      return new NullNode();
+    }
+    if (arg === undefined) {
+      return new UndefNode();
+    }
+    if (arg.constructor == Object) {
+      let pairs = [];
+      for (let key in arg) {
+        pairs.push(this.handleArg(key));
+        pairs.push(this.handleArg(arg[key]));
       }
-      if (Array.isArray(arg)) {
-        return new ArrNode(arg.map(this.handleArgs.bind(this)));
-      }
-      return arg;
-    });
+      return new ObjNode(pairs)
+    }
+    return arg;
   }
 
   buildExpression(funcName, langName) {
     return (...args) => {
-      return new ExprNode(funcName, this.handleArgs(args), { langName });
+      return new ExprNode(funcName, args.map(this.handleArg.bind(this)), { langName });
     }
   }
 }
