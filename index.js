@@ -6,9 +6,31 @@ class ExprNode {
   }
 }
 
+class StrNode {
+  constructor(value) {
+    this.value = value;
+  }
+}
+
 class NumNode {
   constructor(value) {
     this.value = value;
+  }
+}
+
+class BoolNode {
+  constructor(value) {
+    this.value = value;
+  }
+}
+
+class NullNode { }
+
+class UndefNode { }
+
+class FuncNode {
+  constructor(func) {
+    this.func = func;
   }
 }
 
@@ -66,7 +88,22 @@ let serializers = {
       return [`${item.info.langName}/${item.name}`].concat(item.args.map(this.toList.bind(this)));
     }
     if (item instanceof NumNode) {
-      return ['number', item.value]
+      return ['number', item.value];
+    }
+    if (item instanceof StrNode) {
+      return ['string', item.value];
+    }
+    if (item instanceof BoolNode) {
+      return ['boolean', item.value];
+    }
+    if (item instanceof NullNode) {
+      return ['null'];
+    }
+    if (item instanceof UndefNode) {
+      return ['undefined'];
+    }
+    if (item instanceof FuncNode) {
+      return ['native-function']
     }
   }
 }
@@ -74,5 +111,12 @@ let serializers = {
 module.exports = {
   TreeBranch,
   Language,
-  serializers
+  serializers,
+  ExprNode,
+  StrNode,
+  NumNode,
+  BoolNode,
+  NullNode,
+  UndefNode,
+  FuncNode,
 }
