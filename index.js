@@ -24,6 +24,18 @@ class BoolNode {
   }
 }
 
+class ArrNode {
+  constructor(items) {
+    this.items = items;
+  }
+}
+
+class ObjNode {
+  constructor(pairs) {
+    this.pairs = pairs;
+  }
+}
+
 class NullNode { }
 
 class UndefNode { }
@@ -56,6 +68,22 @@ class TreeBranch {
     if (item instanceof UndefNode) {
       return undefined;
     }
+    if (item instanceof ArrNode) {
+      return item.items.map(this.eval.bind(this));
+    }
+    if (item instanceof ObjNode) {
+      let result = {};
+      let index = 0;
+
+      while (index < item.pairs.length) {
+        let key = this.eval(item.pairs[index])
+        let value = this.eval(item.pairs[index + 1])
+        result[key] = value;
+        index = index + 2;
+      }
+
+      return result;
+    }
   }
 }
 
@@ -71,6 +99,9 @@ class Language {
     return args.map((arg) => {
       if (Number.isInteger(arg)) {
         return new NumNode(arg);
+      }
+      if (Array.isArray(arg)) {
+        return new ArrNode(arg.map(this.handleArgs.bind(this)));
       }
       return arg;
     });
@@ -104,6 +135,12 @@ let serializers = {
     if (item instanceof UndefNode) {
       return ['undefined'];
     }
+    if (item instanceof ArrNode) {
+      return ['array'].concat(item.items.map(this.toList.bind(this)));
+    }
+    if (item instanceof ObjNode) {
+      return ['object'].concat(item.pairs.map(this.toList.bind(this)));
+    }
   }
 }
 
@@ -117,4 +154,6 @@ module.exports = {
   BoolNode,
   NullNode,
   UndefNode,
+  ArrNode,
+  ObjNode,
 }
