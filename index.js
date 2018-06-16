@@ -13,19 +13,25 @@ class NumNode {
 }
 
 class TreeBranch {
-  constructor() {
-    this.languages = {}
+  constructor(language) {
+    this.registry = {}
+    this.language = language || new Language();
   }
 
-  register(name, obj) {
-    this.languages[name] = obj;
-    return new Language(Object.keys(obj), { name });
+  register(langName, obj) {
+    this.registry[langName] = obj;
+    return this.language.build(langName, Object.keys(obj));
   }
 
-  eval(value) {
-    if (!(value instanceof ExprNode)) return value;
-    let rest = value.rest.map(this.eval.bind(this))
-    return this.functions[value.name](...rest);
+  eval(item) {
+    if (item instanceof ExprNode) {
+      let rest = item.args.map(this.eval.bind(this))
+      let func = this.registry[item.info.langName][item.name];
+      return func(...rest);
+    }
+    if (item instanceof NumNode) {
+      return item.value
+    }
   }
 }
 
@@ -37,22 +43,24 @@ class Language {
     }, { _meta: { langName } });
   }
 
-  handleArg(arg) {
-    if (Number.isInteger(arg)) {
-      return new NumNode(arg);
-    }
-    return arg;
+  handleArgs(args) {
+    return args.map((arg) => {
+      if (Number.isInteger(arg)) {
+        return new NumNode(arg);
+      }
+      return arg;
+    });
   }
 
   buildExpression(funcName, langName) {
     return (...args) => {
-      return new ExprNode(funcName, args.map(this.handleArg.bind(this)), { langName });
+      return new ExprNode(funcName, this.handleArgs(args), { langName });
     }
   }
 }
 
 
-class Serializer {
+let serializers = {
   toList(item) {
     if (item instanceof ExprNode) {
       return [`${item.info.langName}/${item.name}`].concat(item.args.map(this.toList.bind(this)));
@@ -66,5 +74,5 @@ class Serializer {
 module.exports = {
   TreeBranch,
   Language,
-  Serializer
+  serializers
 }

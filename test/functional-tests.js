@@ -1,6 +1,6 @@
 const chai = require('chai');
 const expect = chai.expect;
-const { TreeBranch, Language, Serializer } = require('../index');
+const { TreeBranch, Language, serializers } = require('../index');
 
 describe('TreeBranch', function () {
   let mathLang = {
@@ -10,16 +10,14 @@ describe('TreeBranch', function () {
   };
 
   context('running code', function () {
-    it.skip('returns the correct value', function () {
+    it('returns the correct value', function () {
       let treebranch = new TreeBranch();
 
-      let mathLang = treebranch.register('math', {
+      let m = treebranch.register('math', {
         add: (a, b) => a + b,
         subtract: (a, b) => a - b,
         multiply: (a, b) => a * b
       });
-
-      let m = mathLang.build();
 
       let code = m.multiply(
         m.add(6, 2),
@@ -40,9 +38,7 @@ describe('TreeBranch', function () {
         m.add(6, 2),
         m.subtract(6, 4));
 
-      let serializer = new Serializer();
-
-      expect(serializer.toList(tree)).to.deep.equal(
+      expect(serializers.toList(tree)).to.deep.equal(
         ['math/multiply',
           ['math/add', ['number', 6], ['number', 2]],
           ['math/subtract', ['number', 6], ['number', 4]]]);
