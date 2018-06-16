@@ -1,0 +1,22 @@
+{
+  "name": "treebranch",
+  "version": "0.1.0",
+  "description": "Create DSLs",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "test:watch": "nodemon --exec \"mocha\""
+  },
+  "keywords": [
+    "language",
+    "dsl",
+    "ast",
+    "tree"
+  ],
+  "author": "Stephen Mizell",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0"
+  }
+}
