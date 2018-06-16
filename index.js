@@ -28,12 +28,6 @@ class NullNode { }
 
 class UndefNode { }
 
-class FuncNode {
-  constructor(func) {
-    this.func = func;
-  }
-}
-
 class TreeBranch {
   constructor(language) {
     this.registry = {}
@@ -51,8 +45,16 @@ class TreeBranch {
       let func = this.registry[item.info.langName][item.name];
       return func(...rest);
     }
-    if (item instanceof NumNode) {
+    if (item instanceof NumNode ||
+      item instanceof StrNode ||
+      item instanceof BoolNode) {
       return item.value
+    }
+    if (item instanceof NullNode) {
+      return null;
+    }
+    if (item instanceof UndefNode) {
+      return undefined;
     }
   }
 }
@@ -102,9 +104,6 @@ let serializers = {
     if (item instanceof UndefNode) {
       return ['undefined'];
     }
-    if (item instanceof FuncNode) {
-      return ['native-function']
-    }
   }
 }
 
@@ -118,5 +117,4 @@ module.exports = {
   BoolNode,
   NullNode,
   UndefNode,
-  FuncNode,
 }
