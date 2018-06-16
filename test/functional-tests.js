@@ -1,6 +1,6 @@
 const chai = require('chai');
 const expect = chai.expect;
-const { TreeBranch, Language, serializers } = require('../index');
+const { TreeBranch, createLanguage, serializers } = require('../index');
 
 describe('TreeBranch', function () {
   let mathLang = {
@@ -31,8 +31,7 @@ describe('TreeBranch', function () {
 
   context('serializes correctly', function () {
     it('returns the correct values', function () {
-      let lang = new Language()
-      let m = lang.build('math', ['multiply', 'add', 'subtract']);
+      let m = createLanguage('math', ['multiply', 'add', 'subtract']);
 
       let tree = m.multiply(
         m.add(6, 2),

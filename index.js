@@ -43,12 +43,11 @@ class UndefNode { }
 class TreeBranch {
   constructor(language) {
     this.registry = {}
-    this.language = language || new Language();
   }
 
   register(langName, obj) {
     this.registry[langName] = obj;
-    return this.language.build(langName, Object.keys(obj));
+    return createLanguage(langName, Object.keys(obj));
   }
 
   eval(item) {
@@ -87,51 +86,54 @@ class TreeBranch {
   }
 }
 
-class Language {
-  build(langName, funcNames) {
-    return funcNames.reduce((result, funcName) => {
-      result[funcName] = this.buildExpression(funcName, langName);
-      return result
-    }, { _meta: { langName } });
-  }
+function createLanguage(langName, funcNames, expressionBuilder) {
+  let expr = expressionBuilder || buildExpression;
 
-  handleArg(arg) {
-    if (Number.isInteger(arg)) {
-      return new NumNode(arg);
-    }
-    if (Array.isArray(arg)) {
-      return new ArrNode(arg.map(this.handleArg.bind(this)));
-    }
-    if ((typeof arg) === 'string') {
-      return new StrNode(arg);
-    }
-    if ((typeof arg) === 'boolean') {
-      return new BoolNode(arg);
-    }
-    if (arg === null) {
-      return new NullNode();
-    }
-    if (arg === undefined) {
-      return new UndefNode();
-    }
-    if (arg.constructor == Object) {
-      let pairs = [];
-      for (let key in arg) {
-        pairs.push(this.handleArg(key));
-        pairs.push(this.handleArg(arg[key]));
-      }
-      return new ObjNode(pairs)
-    }
-    return arg;
-  }
-
-  buildExpression(funcName, langName) {
-    return (...args) => {
-      return new ExprNode(funcName, args.map(this.handleArg.bind(this)), { langName });
-    }
-  }
+  return funcNames.reduce((result, funcName) => {
+    result[funcName] = expr(funcName, langName);
+    return result
+  }, { _meta: { langName } });
 }
 
+function handleValue(arg) {
+  if (Number.isInteger(arg)) {
+    return new NumNode(arg);
+  }
+  if (Array.isArray(arg)) {
+    return new ArrNode(arg.map(handleValue));
+  }
+  if ((typeof arg) === 'string') {
+    return new StrNode(arg);
+  }
+  if ((typeof arg) === 'boolean') {
+    return new BoolNode(arg);
+  }
+  if (arg === null) {
+    return new NullNode();
+  }
+  if (arg === undefined) {
+    return new UndefNode();
+  }
+  if (arg.constructor === Object) {
+    let pairs = [];
+    for (let key in arg) {
+      pairs.push(handleValue(key));
+      pairs.push(handleValue(arg[key]));
+    }
+    return new ObjNode(pairs)
+  }
+  if (arg instanceof ExprNode) {
+    return arg
+  }
+
+  throw TypeError(`Cannot handle arg ${arg}`)
+}
+
+function buildExpression(funcName, langName) {
+  return (...args) => {
+    return new ExprNode(funcName, args.map(handleValue), { langName });
+  }
+}
 
 let serializers = {
   toList(item) {
@@ -164,7 +166,7 @@ let serializers = {
 
 module.exports = {
   TreeBranch,
-  Language,
+  createLanguage,
   serializers,
   ExprNode,
   StrNode,
