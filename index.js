@@ -1,51 +1,19 @@
-class ExprNode {
-  constructor(name, args = [], info = {}) {
-    this.name = name;
-    this.args = args;
-    this.info = info;
-  }
-}
+const {
+  ExprNode,
+  StrNode,
+  NumNode,
+  BoolNode,
+  NullNode,
+  UndefNode,
+  ArrNode,
+  ObjNode,
+  FuncNode,
+} = require('./lib/nodes');
 
-class StrNode {
-  constructor(value) {
-    this.value = value;
-  }
-}
 
-class NumNode {
-  constructor(value) {
-    this.value = value;
-  }
-}
-
-class BoolNode {
-  constructor(value) {
-    this.value = value;
-  }
-}
-
-class ArrNode {
-  constructor(items) {
-    this.items = items;
-  }
-}
-
-class ObjNode {
-  constructor(pairs = []) {
-    this.pairs = pairs;
-  }
-}
-
-class NullNode { }
-
-class UndefNode { }
-
-class FuncNode {
-  constructor(func) {
-    this.func = func;
-  }
-}
-
+// Create a sort of runtime with a way to register code and create a language
+// from it. Once the code is registered, the languages create, the tree built,
+// it can then be passed into eval to execute.
 class TreeBranch {
   constructor(language) {
     this.registry = {}
@@ -104,6 +72,7 @@ function createLanguage(langName, funcNames, expressionBuilder) {
   }, { _meta: { langName } });
 }
 
+// Allows for converting JavaScript primitives to node types
 function handleValue(arg) {
   if (Number.isInteger(arg)) {
     return new NumNode(arg);
@@ -141,14 +110,18 @@ function handleValue(arg) {
   throw TypeError(`Cannot handle arg ${arg}`)
 }
 
+// Used for creating the language. It takes arguments and converts them to
+// nodes.
 function buildExpression(funcName, langName) {
   return (...args) => {
     return new ExprNode(funcName, args.map(handleValue), { langName });
   }
 }
 
+// Converts a tree of nodes to some other representation
 let serializers = {
   toList(item) {
+    // Expressions are namespaced with the language name
     if (item instanceof ExprNode) {
       return [`${item.info.langName}/${item.name}`].concat(item.args.map(this.toList.bind(this)));
     }
@@ -173,6 +146,7 @@ let serializers = {
     if (item instanceof ObjNode) {
       return ['object'].concat(item.pairs.map(this.toList.bind(this)));
     }
+    // Native functions cannot be serialized
     if (item instanceof FuncNode) {
       return ['native-function']
     }
@@ -192,4 +166,5 @@ module.exports = {
   ArrNode,
   ObjNode,
   FuncNode,
+  handleValue,
 }

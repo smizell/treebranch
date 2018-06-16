@@ -29,7 +29,7 @@ describe('TreeBranch', function () {
     });
   });
 
-  context('serializes correctly', function () {
+  context('serializers', function () {
     it('returns the correct values', function () {
       let m = createLanguage('math', ['multiply', 'add', 'subtract']);
 
