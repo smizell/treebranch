@@ -50,6 +50,12 @@ describe('TreeBranch', function () {
       expect(t.eval(arr)).to.deep.equal({ foo: 'bar' });
       expect(treebranch.serializers.toList(arr)).to.deep.equal(['object', ['string', 'foo'], ['string', 'bar']])
     });
+
+    it('handles functions correctly', function () {
+      let func = new treebranch.FuncNode((x) => x + 1);
+      expect(t.eval(func)(2)).to.equal(3);
+      expect(treebranch.serializers.toList(func)).to.deep.equal(['native-function'])
+    });
   });
 
   context('Language', function () {
@@ -91,6 +97,11 @@ describe('TreeBranch', function () {
       let code = l.bar({ foo: 4 });
       expect(typer(code.args[0])).to.equal('ObjNode');
       expect(code.args[0].pairs.map(typer)).to.deep.equal(['StrNode', 'NumNode'])
+    });
+
+    it('handles functions correctly', function () {
+      let code = l.bar((x) => x + 1);
+      expect(typer(code.args[0])).to.equal('FuncNode');
     });
   })
 });

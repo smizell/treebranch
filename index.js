@@ -40,6 +40,12 @@ class NullNode { }
 
 class UndefNode { }
 
+class FuncNode {
+  constructor(func) {
+    this.func = func;
+  }
+}
+
 class TreeBranch {
   constructor(language) {
     this.registry = {}
@@ -69,6 +75,9 @@ class TreeBranch {
     }
     if (item instanceof ArrNode) {
       return item.items.map(this.eval.bind(this));
+    }
+    if (item instanceof FuncNode) {
+      return item.func;
     }
     if (item instanceof ObjNode) {
       let result = {};
@@ -122,6 +131,9 @@ function handleValue(arg) {
     }
     return new ObjNode(pairs)
   }
+  if ((typeof arg) === 'function') {
+    return new FuncNode(arg);
+  }
   if (arg instanceof ExprNode) {
     return arg
   }
@@ -161,6 +173,9 @@ let serializers = {
     if (item instanceof ObjNode) {
       return ['object'].concat(item.pairs.map(this.toList.bind(this)));
     }
+    if (item instanceof FuncNode) {
+      return ['native-function']
+    }
   }
 }
 
@@ -176,4 +191,5 @@ module.exports = {
   UndefNode,
   ArrNode,
   ObjNode,
+  FuncNode,
 }
