@@ -17,11 +17,14 @@ const {
 class TreeBranch {
   constructor(language) {
     this.registry = {}
+    this.languages = {}
   }
 
   register(langName, obj) {
+    let lang = createLanguage(langName, Object.keys(obj));
     this.registry[langName] = obj;
-    return createLanguage(langName, Object.keys(obj));
+    this.languages[langName] = lang;
+    return lang;
   }
 
   eval(item) {
