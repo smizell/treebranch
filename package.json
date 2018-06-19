@@ -1,7 +1,7 @@
 {
   "name": "treebranch",
-  "version": "0.1.0",
-  "description": "Create DSLs",
+  "version": "0.2.0",
+  "description": "Create domain specific languages. Execute them as code. Serialize them as JSON. Build your own functionality around them.",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
