@@ -10,6 +10,8 @@ const {
   FuncNode,
 } = require('./lib/nodes');
 
+const { Matcher } = require('./lib/utils');
+
 
 // Create a sort of runtime with a way to register code and create a language
 // from it. Once the code is registered, the languages create, the tree built,
@@ -28,36 +30,33 @@ class TreeBranch {
   }
 
   eval(item) {
-    if (item instanceof ExprNode) {
-      let rest = item.args.map(this.eval.bind(this))
-      let func = this.registry[item.info.langName][item.name];
+    let matcher = new Matcher();
+
+    matcher.onNode(ExprNode, (exprNode) => {
+      let rest = exprNode.args.map(this.eval.bind(this))
+      let func = this.registry[exprNode.info.langName][exprNode.name];
       return func(...rest);
-    }
-    if (item instanceof NumNode ||
-      item instanceof StrNode ||
-      item instanceof BoolNode) {
-      return item.value
-    }
-    if (item instanceof NullNode) {
-      return null;
-    }
-    if (item instanceof UndefNode) {
-      return undefined;
-    }
-    if (item instanceof ArrNode) {
-      return item.items.map(this.eval.bind(this));
-    }
-    if (item instanceof FuncNode) {
-      return item.func;
-    }
-    if (item instanceof ObjNode) {
-      return item.pairs.reduce((result, member) => {
+    });
+
+    matcher.onNode(NumNode, numNode => numNode.value);
+    matcher.onNode(StrNode, strNode => strNode.value);
+    matcher.onNode(BoolNode, boolNode => boolNode.value);
+    matcher.onNode(NullNode, _ => null);
+    matcher.onNode(UndefNode, _ => undefined);
+    matcher.onNode(ArrNode, (arrNode) => arrNode.items.map(this.eval.bind(this)));
+    matcher.onNode(FuncNode, funcNode => funcNode.func);
+
+    matcher.onNode(ObjNode, (objNode) => {
+      return objNode.pairs.reduce((result, member) => {
         let key = this.eval(member[0]);
         let value = this.eval(member[1]);
         result[key] = value;
         return result;
       }, {});
-    }
+    });
+
+    let val = matcher.match(item);
+    return val;
   }
 }
 
