@@ -1,6 +1,6 @@
 {
   "name": "treebranch",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Create domain specific languages. Execute them as code. Serialize them as JSON. Build your own functionality around them.",
   "main": "index.js",
   "scripts": {
