@@ -59,7 +59,7 @@ describe('TreeBranch', function () {
   });
 
   context('Language', function () {
-    let l = treebranch.createLanguage('foo', ['bar']);
+    let l = treebranch.createLanguage({ name: 'foo', methods: ['bar'] });
     let typer = (code) => code.constructor.name;
 
     it('handles strings correctly', function () {

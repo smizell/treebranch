@@ -12,10 +12,13 @@ describe('TreeBranch', function () {
   context('running code', function () {
     let treebranch = new TreeBranch();
 
-    let m = treebranch.register('math', {
-      add: (a, b) => a + b,
-      subtract: (a, b) => a - b,
-      multiply: (a, b) => a * b
+    let m = treebranch.register({
+      name: 'math',
+      methods: {
+        add: (a, b) => a + b,
+        subtract: (a, b) => a - b,
+        multiply: (a, b) => a * b
+      }
     });
 
     it('returns the correct value', function () {
@@ -39,7 +42,10 @@ describe('TreeBranch', function () {
 
   context('serializers', function () {
     it('returns the correct values', function () {
-      let m = createLanguage('math', ['multiply', 'add', 'subtract']);
+      let m = createLanguage({
+        name: 'math',
+        methods: ['multiply', 'add', 'subtract']
+      });
 
       let tree = m.multiply(
         m.add(6, 2),
