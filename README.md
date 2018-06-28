@@ -20,7 +20,10 @@ npm install treebranch
 const treebranch = require('treebranch');
 
 // Create a language with a name and semantics
-const l = treebranch.createLanguage('math', ['add', 'subtract']);
+const l = treebranch.createLanguage({
+  name: 'math', 
+  methods: ['add', 'subtract']
+});
 
 // Build a tree from our DSL
 const tree = l.add(l.subtract(4, 2), 8);
@@ -57,9 +60,12 @@ const treebranch = require('treebranch');
 const runtime = treebranch.TreeBranch();
 
 // Pass in a name and functions, which will register your code and create a language for you.
-const l = runtime.register('math', {
-  add: (a, b) => a + b,
-  subtract: (a, b) => a - b,
+const l = runtime.register({
+  name: 'math', 
+  methods: {
+    add: (a, b) => a + b,
+    subtract: (a, b) => a - b,
+  }
 });
 
 const tree = l.add(l.subtract(4, 2), 8);
