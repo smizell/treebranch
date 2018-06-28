@@ -1,6 +1,6 @@
 # Tree Branch
 
-Create domain specific languages. Execute them as code. Serialize them as JSON. Build your own functionality around them.
+Create domain specific languages. Evaluate them as code. Serialize them as JSON. Build your own functionality around them.
 
 ## Overview
 
