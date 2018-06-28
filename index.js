@@ -51,17 +51,12 @@ class TreeBranch {
       return item.func;
     }
     if (item instanceof ObjNode) {
-      let result = {};
-      let index = 0;
-
-      while (index < item.pairs.length) {
-        let key = this.eval(item.pairs[index])
-        let value = this.eval(item.pairs[index + 1])
+      return item.pairs.reduce((result, member) => {
+        let key = this.eval(member[0]);
+        let value = this.eval(member[1]);
         result[key] = value;
-        index = index + 2;
-      }
-
-      return result;
+        return result;
+      }, {});
     }
   }
 }
@@ -96,11 +91,9 @@ function handleValue(arg) {
     return new UndefNode();
   }
   if (arg.constructor === Object) {
-    let pairs = [];
-    for (let key in arg) {
-      pairs.push(handleValue(key));
-      pairs.push(handleValue(arg[key]));
-    }
+    let pairs = Object.keys(arg).map((key) => {
+      return [handleValue(key), handleValue(arg[key])];
+    })
     return new ObjNode(pairs)
   }
   if ((typeof arg) === 'function') {
@@ -123,37 +116,42 @@ function buildExpression(funcName, langName) {
 
 // Converts a tree of nodes to some other representation
 let serializers = {
-  toList(item) {
-    // Expressions are namespaced with the language name
-    if (item instanceof ExprNode) {
-      return [`${item.info.langName}/${item.name}`].concat(item.args.map(this.toList.bind(this)));
-    }
-    if (item instanceof NumNode) {
-      return ['number', item.value];
-    }
-    if (item instanceof StrNode) {
-      return ['string', item.value];
-    }
-    if (item instanceof BoolNode) {
-      return ['boolean', item.value];
-    }
-    if (item instanceof NullNode) {
-      return ['null'];
-    }
-    if (item instanceof UndefNode) {
-      return ['undefined'];
-    }
-    if (item instanceof ArrNode) {
-      return ['array'].concat(item.items.map(this.toList.bind(this)));
-    }
-    if (item instanceof ObjNode) {
-      return ['object'].concat(item.pairs.map(this.toList.bind(this)));
-    }
-    // Native functions cannot be serialized
-    if (item instanceof FuncNode) {
-      return ['native-function']
-    }
+  toList
+}
+
+function toList(item) {
+  // Expressions are namespaced with the language name
+  if (item instanceof ExprNode) {
+    return [`${item.info.langName}/${item.name}`].concat(item.args.map(toList));
   }
+  if (item instanceof NumNode) {
+    return ['number', item.value];
+  }
+  if (item instanceof StrNode) {
+    return ['string', item.value];
+  }
+  if (item instanceof BoolNode) {
+    return ['boolean', item.value];
+  }
+  if (item instanceof NullNode) {
+    return ['null'];
+  }
+  if (item instanceof UndefNode) {
+    return ['undefined'];
+  }
+  if (item instanceof ArrNode) {
+    return ['array'].concat(item.items.map(toList));
+  }
+  if (item instanceof ObjNode) {
+    return ['object'].concat(item.pairs.map((item) => {
+      return [toList(item[0]), toList(item[1])];
+    }));
+  }
+  // Native functions cannot be serialized
+  if (item instanceof FuncNode) {
+    return ['native-function']
+  }
+
 }
 
 module.exports = {

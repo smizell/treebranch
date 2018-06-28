@@ -46,9 +46,9 @@ describe('TreeBranch', function () {
 
     it('handles objects correctly', function () {
       let arr = new treebranch.ObjNode([
-        new treebranch.StrNode('foo'), new treebranch.StrNode('bar')]);
+        [new treebranch.StrNode('foo'), new treebranch.StrNode('bar')]]);
       expect(t.eval(arr)).to.deep.equal({ foo: 'bar' });
-      expect(treebranch.serializers.toList(arr)).to.deep.equal(['object', ['string', 'foo'], ['string', 'bar']])
+      expect(treebranch.serializers.toList(arr)).to.deep.equal(['object', [['string', 'foo'], ['string', 'bar']]]);
     });
 
     it('handles functions correctly', function () {
@@ -96,7 +96,7 @@ describe('TreeBranch', function () {
     it('handles objects correctly', function () {
       let code = l.bar({ foo: 4 });
       expect(typer(code.args[0])).to.equal('ObjNode');
-      expect(code.args[0].pairs.map(typer)).to.deep.equal(['StrNode', 'NumNode'])
+      expect(code.args[0].pairs[0].map(typer)).to.deep.equal(['StrNode', 'NumNode']);
     });
 
     it('handles functions correctly', function () {
